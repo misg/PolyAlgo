@@ -4,6 +4,34 @@
 
 using namespace std;
 
+void divide(int a, int& p1, int& p2)
+{
+    if (a % 2 == 0)
+    {
+        p1 = a / 2;
+        p2 = a / 2;
+    }
+    else
+    {
+        p1 = a / 2;
+        p2 = a / 2 + 1;
+    }
+}
+
+int repetitions_max(vector<int>& v)
+{
+    int repetitions = 1;
+
+    auto plate = v.rbegin() + 1;
+    while (plate != v.rend() && *plate == v.back())
+    {
+        repetitions++;
+        plate++;
+    }
+
+    return repetitions;
+}
+
 int main()
 {
     int n;
@@ -22,31 +50,40 @@ int main()
         sort(n_pancakes.begin(), n_pancakes.end());
 
         int time = 0;
-        int cost_special_minute = 1 + ((n_pancakes.back() % 2 == 0)? (n_pancakes.back() / 2) : (1 + n_pancakes.back() / 2));
+
+        int fst_max = n_pancakes.back();
+        int repetitions = repetitions_max(n_pancakes);
+        int snd_max = ((n_pancakes.size() - repetitions - 1) < 0)? -1 : n_pancakes[n_pancakes.size() - repetitions - 1];
+        
+        int p1, p2;
+        divide(n_pancakes.back(), p1, p2);
+
+        int cost_special_minute = repetitions + max(snd_max, max(p1, p2));
 
         while (cost_special_minute < n_pancakes.back())
         {
-            int max_plate = n_pancakes.back();
-            n_pancakes.pop_back();
-            
-            int part = max_plate / 2;
+            time += repetitions;
 
-            if (max_plate % 2 == 0)
-            {
-                n_pancakes.push_back(part);
-                n_pancakes.push_back(part);
-            }
-            else
-            {
-                n_pancakes.push_back(part);
-                n_pancakes.push_back(part + 1);
-            }
+            // remove all the max:
 
+            for (int j = 0; j < repetitions; j++)
+                n_pancakes.pop_back();
+
+            // add all the two parts of the max divided:
+            for (int j = 0; j < repetitions; j++)
+            {
+                n_pancakes.push_back(p1);
+                n_pancakes.push_back(p2);
+            }
+                
             sort(n_pancakes.begin(), n_pancakes.end());
 
-            time++;
-
-            cost_special_minute = 1 + ((n_pancakes.back() % 2 == 0)? (n_pancakes.back() / 2) : (1 + n_pancakes.back() / 2));
+            fst_max = n_pancakes.back();
+            repetitions = repetitions_max(n_pancakes);
+            snd_max = ((n_pancakes.size() - repetitions - 1) < 0)? -1 : n_pancakes[n_pancakes.size() - repetitions - 1];
+        
+            divide(n_pancakes.back(), p1, p2);
+            cost_special_minute = repetitions + max(snd_max, max(p1, p2));
         }
 
         time += n_pancakes.back();
