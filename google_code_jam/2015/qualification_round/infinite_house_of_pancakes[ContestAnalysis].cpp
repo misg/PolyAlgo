@@ -17,7 +17,7 @@ int main()
         int n_diners;
         cin >> n_diners;
 
-        vector<int> n_pancakes(n);
+        vector<int> n_pancakes(n_diners);
         int max_pancakes = 0;
 
         for (int j = 0; j < n_diners; j++)
