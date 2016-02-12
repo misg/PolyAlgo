@@ -6,11 +6,20 @@
 
 using namespace std;
 
-bool cmp_tuples(tuple<int, int, int>& t1, tuple<int, int, int>& t2)
+struct b
 {
-//cout << get<0>(t1) << ", " << get<1>(t1) << ", " << get<2>(t1) << " et "
-//     << get<0>(t2) << ", " << get<1>(t1) << ", " << get<2>(t1) << endl;
-    return (get<2>(t1) < get<2>(t2));
+    b(int i_, int M_i_, int free_) :
+        i(i_), M_i(M_i_), free(free_) {};
+
+    int i;
+    int M_i;
+    int free;
+};
+
+
+bool cmp_b(b* b1, b* b2)
+{
+    return b1->free < b2->free;
 }
 
 int main()
@@ -23,15 +32,15 @@ int main()
         int n_b, r;
         cin >> n_b >> r;
 
-        vector<tuple<int, int, int>> info(n_b + 1); // <barber_i, M_i, t_i> where t_i is the time after the barber will be free
+        vector<b*> info(n_b); 
         list<int> free;
 
-        for (int b_i = 1; b_i <= n_b; b_i++)
+        for (int b_i = 0; b_i < n_b; b_i++)
         {
             int M_i;
             cin >> M_i;
-cout << "(" << b_i << ", " << M_i << ", " << "0)" << endl;
-            info[b_i] = make_tuple(b_i, M_i, 0);
+            
+            info[b_i] = new b(b_i, M_i, 0);
             free.push_back(b_i);
         }
 
@@ -39,40 +48,29 @@ cout << "(" << b_i << ", " << M_i << ", " << "0)" << endl;
 
         for (int c_i = 1; c_i <= r; c_i++)
         {
-        cout << "client: " << c_i << endl;
             if (free.empty())
             {
-                int min_time = get<2>(*min_element(info.begin() + 1, info.end(), cmp_tuples));
+                int min_time = (*min_element(info.begin(), info.end(), cmp_b))->free;
 
-                while (free.empty())
-                { cout << "on enleve " << min_time << " min a tout le monde" << endl;
-                    for (auto x : info)
-                    {
-cout << get<0>(x) << ", " << get<1>(x) << ", " << get<2>(x) << " (avant) et apres : ";
-                        get<2>(x) -= min_time;
-cout << get<0>(x) << ", " << get<1>(x) << ", " << get<2>(x) << endl;
+                for (auto x : info)
+                {
+                    x->free -= min_time;
                         
-                        if (get<2>(x) == 0) {cout << "barbier num " << get<0>(x) << " libre" << endl;
-                            free.push_back(get<0>(x));}
-                    }
-cout << "ALLO : " << get<0>(info[1]) << ", " << get<1>(info[1]) << ", " << get<2>(info[1]) << endl;
+                    if (x->free == 0)
+                        free.push_back(x->i);
                 }
             }
 
-
-cout << "ALLO : " << get<0>(info[1]) << ", " << get<1>(info[1]) << ", " << get<2>(info[1]) << endl;
+            b* free_b = info[free.front()];
 
             if (c_i == r)
-                ret = free.front();
+                ret = free_b->i + 1;
 
-                // the barber is no more free, it will be in M minutes :
-                
-                get<2>(info[free.front()]) = get<1>(info[free.front()]);
-         cout << "barbier num " << free.front() << " attribue, sera libre dans " << get<2>(info[free.front()]) << endl; 
-                free.pop_front();
+            free_b->free = free_b->M_i;
+
+            free.pop_front(); // Barber no more available
         }
 
-//cout << "size: " << free.size() << endl;
         cout << "Case #" << tc + 1 << ": " << ret << endl;
     }
 }
